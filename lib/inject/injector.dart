@@ -2,10 +2,10 @@
 
 import 'package:ecommerce/bloc/cart/cart_bloc.dart';
 import 'package:ecommerce/bloc/home/home_bloc.dart';
-import 'package:flutter_base_architecture_plugin/core/network/rest_api_client.dart';
 import 'package:flutter_base_architecture_plugin/imports/dart_package_imports.dart';
 import 'package:flutter_base_architecture_plugin/imports/injector_imports.dart';
 
+import '../api/api_response.dart';
 import '../api/home/home_api.dart';
 import '../services/home_service.dart';
 
@@ -37,6 +37,7 @@ abstract class Injector extends BaseInjector {
 
   /// Register Apis
   @Register.singleton(HomeApi)
+  @Register.singleton(ApiClient)
   void _registerApis();
 
   /// Register Services

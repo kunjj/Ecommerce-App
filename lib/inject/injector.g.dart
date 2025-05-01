@@ -14,7 +14,9 @@ class _$Injector extends Injector {
   @override
   void _registerApis() {
     final KiwiContainer container = KiwiContainer();
-    container.registerSingleton((c) => HomeApi(c.resolve<RestApiClient>()));
+    container
+      ..registerSingleton((c) => HomeApi(c.resolve<ApiClient>()))
+      ..registerSingleton((c) => ApiClient());
   }
 
   @override

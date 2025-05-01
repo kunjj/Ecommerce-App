@@ -3,6 +3,7 @@ import 'package:flutter_base_architecture_plugin/core/base_bloc.dart';
 import 'package:flutter_base_architecture_plugin/core/screen_state.dart';
 import 'package:flutter_base_architecture_plugin/core/view_actions.dart';
 
+import '../../core/routes.dart';
 import 'home_contract.dart';
 
 class HomeBloc extends BaseBloc<HomeEvents, HomeData> {
@@ -13,12 +14,14 @@ class HomeBloc extends BaseBloc<HomeEvents, HomeData> {
     on<AddProductToCartEvent>(_addProductToCartEvent);
     on<SearchQueryChangeEvent>(_searchQueryTextEvent);
     on<NavigateToCartScreenEvent>(_navigateToCartScreenEvent);
+    on<RefreshProductEvent>(_refreshProductEvent);
   }
 
   final HomeService _homeService;
 
   static HomeData get initState => (HomeDataBuilder()
         ..state = ScreenState.loading
+        ..searchQuery = ''
         ..products = []
         ..errorMessage = '')
       .build();
@@ -27,27 +30,37 @@ class HomeBloc extends BaseBloc<HomeEvents, HomeData> {
 
   void _getProductsEvent(_, __) async => await _homeService
       .getProducts()
-      .then((response) => response.data != null
+      .then((response) {
+        response.data != null
           ? add(UpdateHomeEvent(state.rebuild((updates) => updates
             ..products = response.data!.products
             ..state = ScreenState.content)))
-          : _displayMessage(
-              response.errorResult?.errorMessage ?? 'Something went wrong'))
-      .catchError((error) => _displayMessage(error.toString()));
+          : add(UpdateHomeEvent(state.rebuild((updates) => updates
+            ..state = ScreenState.error
+            ..errorMessage = response.errorMessage ?? 'Something went wrong')));
+        _homeService.products = state.products;
+      })
+      .catchError((error) => add(UpdateHomeEvent(state.rebuild((updates) => updates
+        ..state = ScreenState.error
+        ..errorMessage = error.toString()))));
 
-  void _displayMessage(String message) => dispatchViewEvent(
-      DisplayMessage(type: DisplayMessageType.toast, message: message));
+  void _addProductToCartEvent(AddProductToCartEvent event, __) {
+    var filteredProducts = state.products.map((product) {
+      product.isSelected = product.id == event.product.id;
+      return product;
+    }).toList();
 
-  void _addProductToCartEvent(AddProductToCartEvent event, __) =>
-      _homeService.addProductToCart(event.product);
+    _homeService.products = filteredProducts;
+
+    add(UpdateHomeEvent(state.rebuild((updates) => updates
+      ..products = filteredProducts)));
+  }
 
   void _searchQueryTextEvent(SearchQueryChangeEvent event, _) {
-    add(UpdateHomeEvent(
-        state.rebuild((updates) => updates..state = ScreenState.loading)));
+    add(UpdateHomeEvent(state.rebuild((updates) => updates..state = ScreenState.loading)));
 
     var filteredProducts = state.products.map((product) {
-      product.isSearchQueryMatched =
-          product.title!.toLowerCase().contains(event.query.toLowerCase());
+      product.isSearchQueryMatched = product.title!.toLowerCase().contains(event.query.toLowerCase());
       return product;
     }).toList();
 
@@ -56,6 +69,10 @@ class HomeBloc extends BaseBloc<HomeEvents, HomeData> {
       ..products = filteredProducts)));
   }
 
-  void _navigateToCartScreenEvent(_, __) =>
-      dispatchViewEvent(NavigateScreen('Cart Screen'));
+  void _navigateToCartScreenEvent(_, __) => dispatchViewEvent(NavigateScreen(AppRoutes.cartScreen));
+
+  void _refreshProductEvent(RefreshProductEvent event, _) {
+    add(UpdateHomeEvent(state.rebuild((updates) => updates..state = ScreenState.loading)));
+    add(GetProductsEvent());
+  }
 }

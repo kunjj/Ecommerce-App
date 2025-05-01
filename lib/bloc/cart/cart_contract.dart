@@ -26,3 +26,9 @@ class UpdateCartEvent extends CartEvents {
 
   UpdateCartEvent(this.state);
 }
+
+class RemoveProductEvent extends CartEvents{
+  final Product product;
+
+  RemoveProductEvent({required this.product});
+}

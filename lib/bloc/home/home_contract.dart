@@ -43,3 +43,5 @@ class SearchQueryChangeEvent extends HomeEvents {
 }
 
 class NavigateToCartScreenEvent extends HomeEvents {}
+
+class RefreshProductEvent extends HomeEvents {}

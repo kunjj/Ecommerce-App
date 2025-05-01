@@ -1,21 +1,25 @@
 import 'dart:async';
 
+import 'package:ecommerce/api/api_response.dart';
 import 'package:ecommerce/api/home/home_api.dart';
 import 'package:ecommerce/api/home/product.dart';
-import 'package:flutter_base_architecture_plugin/imports/api_imports.dart';
 
 class HomeService {
   final HomeApi _homeApi;
+  List<Product> _products = [];
 
   HomeService(this._homeApi);
 
-  Future<ResponseEntity<ProductResponse>> getProducts() async =>
+  Future<ApiResponse<ProductResponse>> getProducts() async =>
       await _homeApi.getProducts();
 
-  final _productStreamController = StreamController<Product>.broadcast();
+  set products(List<Product> products) => _products = products;
 
-  void addProductToCart(Product product) =>
-      _productStreamController.add(product);
+  List<Product> get products => _products;
 
-  Stream<Product> get productStream => _productStreamController.stream;
+  // List<Product> removeSelectedProduct(Product selectedProduct) {
+  //   _selectedProducts
+  //       .removeWhere((product) => product.id == selectedProduct.id);
+  //   return _selectedProducts;
+  // }
 }
