@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ecommerce/api/home/product.dart';
 import 'package:ecommerce/bloc/home/home_bloc.dart';
 import 'package:ecommerce/bloc/home/home_contract.dart';
@@ -139,6 +140,7 @@ class _ProductList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
+        cacheExtent: 5,
         itemBuilder: (_, index) {
           var product = products[index];
           return _ProductItem(product: product, onRemoveTap: () => onRemoveTap(product), onAddTap: () => onProductAddToCart(product));
@@ -162,7 +164,13 @@ class _ProductItem extends StatelessWidget {
       child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10.0),
           child: Row(children: [
-            Image.network(product.image!, width: 80, height: 80),
+            CachedNetworkImage(
+              imageUrl: product.image ?? '',
+              width: 80,
+              height: 80,
+              placeholder: (_, __) => const CircularProgressIndicator(strokeWidth: 2),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
+            ),
             const Gap(6),
             Expanded(
                 child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.stretch, children: [

@@ -13,6 +13,7 @@ dependencies:
 
   flutter_base_architecture_plugin: 0.0.1
   cupertino_icons: 1.0.8
+  cached_network_image: 3.3.1
   gap: 3.0.1
 
 dev_dependencies:
@@ -26,4 +27,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
