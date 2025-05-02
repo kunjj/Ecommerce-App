@@ -13,14 +13,22 @@ class _$CartData extends CartData {
   final String? errorMessage;
   @override
   final List<Product> products;
+  @override
+  final num totalAmount;
 
   factory _$CartData([void Function(CartDataBuilder)? updates]) =>
       (new CartDataBuilder()..update(updates))._build();
 
-  _$CartData._({required this.state, this.errorMessage, required this.products})
+  _$CartData._(
+      {required this.state,
+      this.errorMessage,
+      required this.products,
+      required this.totalAmount})
       : super._() {
     BuiltValueNullFieldError.checkNotNull(state, r'CartData', 'state');
     BuiltValueNullFieldError.checkNotNull(products, r'CartData', 'products');
+    BuiltValueNullFieldError.checkNotNull(
+        totalAmount, r'CartData', 'totalAmount');
   }
 
   @override
@@ -36,7 +44,8 @@ class _$CartData extends CartData {
     return other is CartData &&
         state == other.state &&
         errorMessage == other.errorMessage &&
-        products == other.products;
+        products == other.products &&
+        totalAmount == other.totalAmount;
   }
 
   @override
@@ -45,6 +54,7 @@ class _$CartData extends CartData {
     _$hash = $jc(_$hash, state.hashCode);
     _$hash = $jc(_$hash, errorMessage.hashCode);
     _$hash = $jc(_$hash, products.hashCode);
+    _$hash = $jc(_$hash, totalAmount.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -54,7 +64,8 @@ class _$CartData extends CartData {
     return (newBuiltValueToStringHelper(r'CartData')
           ..add('state', state)
           ..add('errorMessage', errorMessage)
-          ..add('products', products))
+          ..add('products', products)
+          ..add('totalAmount', totalAmount))
         .toString();
   }
 }
@@ -74,6 +85,10 @@ class CartDataBuilder implements Builder<CartData, CartDataBuilder> {
   List<Product>? get products => _$this._products;
   set products(List<Product>? products) => _$this._products = products;
 
+  num? _totalAmount;
+  num? get totalAmount => _$this._totalAmount;
+  set totalAmount(num? totalAmount) => _$this._totalAmount = totalAmount;
+
   CartDataBuilder();
 
   CartDataBuilder get _$this {
@@ -82,6 +97,7 @@ class CartDataBuilder implements Builder<CartData, CartDataBuilder> {
       _state = $v.state;
       _errorMessage = $v.errorMessage;
       _products = $v.products;
+      _totalAmount = $v.totalAmount;
       _$v = null;
     }
     return this;
@@ -108,7 +124,9 @@ class CartDataBuilder implements Builder<CartData, CartDataBuilder> {
                 state, r'CartData', 'state'),
             errorMessage: errorMessage,
             products: BuiltValueNullFieldError.checkNotNull(
-                products, r'CartData', 'products'));
+                products, r'CartData', 'products'),
+            totalAmount: BuiltValueNullFieldError.checkNotNull(
+                totalAmount, r'CartData', 'totalAmount'));
     replace(_$result);
     return _$result;
   }

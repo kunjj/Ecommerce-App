@@ -7,11 +7,6 @@ class HomeApi {
 
   HomeApi(this._restApiClient);
 
-  Future<ApiResponse<ProductResponse>> getProducts() async {
-    return await _restApiClient.get(path: Apis.getProducts).then((response) {
-      return response.isSuccess
-          ? ApiResponse.success(ProductResponse.fromJson(response.data))
-          : ApiResponse.error(response.errorMessage!);
-    });
-  }
+  Future<ApiResponse<ProductResponse>> getProducts() async => await _restApiClient.get(path: Apis.getProducts).then((response) =>
+      response.isSuccess ? ApiResponse.success(ProductResponse.fromJson(response.data)) : ApiResponse.error(response.errorMessage!));
 }

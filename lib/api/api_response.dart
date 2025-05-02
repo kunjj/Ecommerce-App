@@ -75,7 +75,7 @@ ApiResponse<T> handleDioError<T>(DioException e) {
       errorMessage = 'Request cancelled.';
       break;
     case DioExceptionType.connectionError:
-      errorMessage = 'Connection error. Please check your internet connection.';
+      errorMessage = 'No internet connection.';
       break;
     case DioExceptionType.unknown:
     default:

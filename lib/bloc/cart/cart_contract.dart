@@ -1,4 +1,3 @@
-
 import 'package:ecommerce/api/home/product.dart';
 import 'package:flutter_base_architecture_plugin/core/screen_state.dart';
 import 'package:flutter_base_architecture_plugin/imports/dart_package_imports.dart';
@@ -15,6 +14,8 @@ abstract class CartData implements Built<CartData, CartDataBuilder> {
   String? get errorMessage;
 
   List<Product> get products;
+
+  num get totalAmount;
 }
 
 abstract class CartEvents {}
@@ -25,10 +26,4 @@ class UpdateCartEvent extends CartEvents {
   final CartData state;
 
   UpdateCartEvent(this.state);
-}
-
-class RemoveProductEvent extends CartEvents{
-  final Product product;
-
-  RemoveProductEvent({required this.product});
 }

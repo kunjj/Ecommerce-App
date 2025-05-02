@@ -27,20 +27,12 @@ class _CartScreenState extends BaseState<CartBloc, CartScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-            title: const Text('Selected Products',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold)),
-            leading: IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back))),
+            title: const Text('Selected Products', style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold)),
+            leading: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back))),
         backgroundColor: Colors.white,
         body: SafeArea(
             child: BlocProvider<CartBloc>(
-                create: (context) => bloc,
-                child: BlocBuilder<CartBloc, CartData>(
-                    builder: (_, __) => _MainContent(bloc: bloc)))));
+                create: (context) => bloc, child: BlocBuilder<CartBloc, CartData>(builder: (_, __) => _MainContent(bloc: bloc)))));
   }
 }
 
@@ -70,10 +62,8 @@ class _DisplayMessage extends StatelessWidget {
   final String message;
 
   @override
-  Widget build(BuildContext context) => Center(
-      child: Text(message,
-          style: const TextStyle(
-              color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)));
+  Widget build(BuildContext context) =>
+      Center(child: Text(message, style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)));
 }
 
 class _ScreenContent extends StatelessWidget {
@@ -83,48 +73,75 @@ class _ScreenContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(children: [
-    const Gap(10),
+        const Gap(10),
         Expanded(
             child: Scrollbar(
                 thumbVisibility: true,
                 child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: _ProductList(
-                        products: bloc.state.products
-                            .where((product) => product.isSearchQueryMatched)
-                            .toList(),
-                        onRemoveTap: (product) =>
-                            bloc.add(RemoveProductEvent(product: product))))))
+                    child: _ProductList(products: bloc.state.products.where((product) => product.isSelected).toList())))),
+        const Divider(height: 2),
+        _TotalAmount(totalAmount: bloc.state.totalAmount.toStringAsFixed(2))
       ]);
 }
 
 class _ProductList extends StatelessWidget {
-  const _ProductList({required this.products, required this.onRemoveTap});
+  const _ProductList({required this.products});
 
   final List<Product> products;
-  final Function(Product) onRemoveTap;
 
   @override
   Widget build(BuildContext context) => ListView.separated(
       itemBuilder: (_, index) {
         var product = products[index];
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Image.network(product.image!, width: 80, height: 80),
-                const Gap(8),
-                Expanded(
-                    child: Text(product.title ?? '',
-                        overflow: TextOverflow.visible)),
-                const Gap(8),
-                IconButton(
-                    onPressed: () => onRemoveTap(product),
-                    icon: const Icon(Icons.remove_circle_outline_outlined))
-              ]),
-        );
+        return _ProductItem(product: product);
       },
       separatorBuilder: (_, __) => const Divider(height: 2),
       itemCount: products.length);
+}
+
+class _ProductItem extends StatelessWidget {
+  const _ProductItem({required this.product});
+
+  final Product product;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10.0),
+        child: Row(children: [
+          Image.network(product.image!, width: 80, height: 80),
+          const Gap(6),
+          Expanded(
+              child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Text(product.title ?? '', overflow: TextOverflow.visible, style: const TextStyle(fontSize: 15)),
+            RichText(
+                text: TextSpan(style: DefaultTextStyle.of(context).style, children: <TextSpan>[
+              const TextSpan(text: 'Price - ', style: TextStyle(fontSize: 14)),
+              TextSpan(text: '\$${product.price}/-', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))
+            ])),
+            RichText(
+                text: TextSpan(style: DefaultTextStyle.of(context).style, children: <TextSpan>[
+              const TextSpan(text: 'Rating - ', style: TextStyle(fontSize: 14)),
+              TextSpan(text: '${product.rating?.rate}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))
+            ]))
+          ]))
+        ]));
+  }
+}
+
+class _TotalAmount extends StatelessWidget {
+  const _TotalAmount({required this.totalAmount});
+
+  final String totalAmount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          const Text('Total', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          ElevatedButton(onPressed: null, child: Text('\$$totalAmount', style: const TextStyle(color: Colors.black, fontSize: 24)))
+        ]));
+  }
 }

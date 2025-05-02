@@ -14,14 +14,7 @@ class ProductResponse {
 }
 
 class Product {
-  Product(
-      {num? id,
-      String? title,
-      num? price,
-      String? description,
-      String? category,
-      String? image,
-      Rating? rating}) {
+  Product({num? id, String? title, num? price, String? description, String? category, String? image, Rating? rating}) {
     _id = id;
     _title = title;
     _price = price;
@@ -49,14 +42,7 @@ class Product {
   String? _image;
   Rating? _rating;
 
-  Product copyWith(
-          {num? id,
-          String? title,
-          num? price,
-          String? description,
-          String? category,
-          String? image,
-          Rating? rating}) =>
+  Product copyWith({num? id, String? title, num? price, String? description, String? category, String? image, Rating? rating}) =>
       Product(
           id: id ?? _id,
           title: title ?? _title,
@@ -82,7 +68,7 @@ class Product {
 
   bool isSearchQueryMatched = true;
 
-  bool isSelected = true;
+  bool isSelected = false;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -113,8 +99,7 @@ class Rating {
   num? _rate;
   num? _count;
 
-  Rating copyWith({num? rate, num? count}) =>
-      Rating(rate: rate ?? _rate, count: count ?? _count);
+  Rating copyWith({num? rate, num? count}) => Rating(rate: rate ?? _rate, count: count ?? _count);
 
   num? get rate => _rate;
 

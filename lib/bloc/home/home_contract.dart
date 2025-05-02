@@ -44,4 +44,10 @@ class SearchQueryChangeEvent extends HomeEvents {
 
 class NavigateToCartScreenEvent extends HomeEvents {}
 
-class RefreshProductEvent extends HomeEvents {}
+class RetryButtonTapEvent extends HomeEvents {}
+
+class RemoveProductCartEvent extends HomeEvents {
+  final Product product;
+
+  RemoveProductCartEvent({required this.product});
+}
