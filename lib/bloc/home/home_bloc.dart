@@ -1,12 +1,13 @@
+import 'package:ecommerce/core/enums.dart';
+import 'package:ecommerce/core/side_effects.dart';
 import 'package:ecommerce/services/home_service.dart';
-import 'package:flutter_base_architecture_plugin/core/base_bloc.dart';
-import 'package:flutter_base_architecture_plugin/core/screen_state.dart';
-import 'package:flutter_base_architecture_plugin/core/view_actions.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../core/routes.dart';
 import 'home_contract.dart';
 
-class HomeBloc extends BaseBloc<HomeEvents, HomeData> {
+class HomeBloc extends Bloc<HomeEvents, HomeData> {
   HomeBloc(this._homeService) : super(initState) {
     on<InitHomeEvent>(_initHomeEvent);
     on<UpdateHomeEvent>((event, emit) => emit(event.state));
@@ -19,6 +20,9 @@ class HomeBloc extends BaseBloc<HomeEvents, HomeData> {
   }
 
   final HomeService _homeService;
+  final PublishSubject<SideEffects> _sideEffects = PublishSubject();
+
+  Stream<SideEffects> get sideEffects => _sideEffects.stream;
 
   static HomeData get initState => (HomeDataBuilder()
         ..state = ScreenState.loading
@@ -26,6 +30,8 @@ class HomeBloc extends BaseBloc<HomeEvents, HomeData> {
         ..products = []
         ..errorMessage = '')
       .build();
+
+  void _dispatchSideEffects(SideEffects action) => _sideEffects.add(action);
 
   void _initHomeEvent(_, __) => add(GetProductsEvent());
 
@@ -68,7 +74,7 @@ class HomeBloc extends BaseBloc<HomeEvents, HomeData> {
       ..products = filteredProducts)));
   }
 
-  void _navigateToCartScreenEvent(_, __) => dispatchViewEvent(NavigateScreen(AppRoutes.cartScreen));
+  void _navigateToCartScreenEvent(_, __) => _dispatchSideEffects(NavigateScreen(AppRoutes.cartScreen));
 
   void _retryButtonTapEvent(_, __) {
     add(UpdateHomeEvent(state.rebuild((updates) => updates..state = ScreenState.loading)));
@@ -84,5 +90,11 @@ class HomeBloc extends BaseBloc<HomeEvents, HomeData> {
     _homeService.products = filteredProducts;
 
     add(UpdateHomeEvent(state.rebuild((updates) => updates..products = filteredProducts)));
+  }
+
+  @override
+  Future<void> close() {
+    _sideEffects.close();
+    return super.close();
   }
 }

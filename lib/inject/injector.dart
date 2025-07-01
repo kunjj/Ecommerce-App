@@ -1,51 +1,45 @@
 // ignore_for_file: constant_identifier_names
 
+import 'package:dio/dio.dart';
+import 'package:ecommerce/api/api_response.dart';
+import 'package:ecommerce/api/home/home_api.dart';
 import 'package:ecommerce/bloc/cart/cart_bloc.dart';
 import 'package:ecommerce/bloc/home/home_bloc.dart';
-import 'package:flutter_base_architecture_plugin/imports/dart_package_imports.dart';
-import 'package:flutter_base_architecture_plugin/imports/injector_imports.dart';
+import 'package:ecommerce/services/home_service.dart';
+import 'package:get_it/get_it.dart';
 
-import '../api/api_response.dart';
-import '../api/home/home_api.dart';
-import '../services/home_service.dart';
+final _getIt = GetIt.instance;
 
-part 'injector.g.dart';
+abstract class Injector {
+  static void setUp() {
+    // Configure Dio
+    _configureDio();
 
-abstract class Injector extends BaseInjector {
-  static late KiwiContainer container;
-
-  static Future<bool> setup() async {
-    container = BaseInjector.baseContainer;
-
-    _$Injector()._configure();
-    return true;
-  }
-
-  void _configure() {
-    // Configure modules here
-    _registerMiscModules();
+    // Register Apis
     _registerApis();
+
+    // Register Services
     _registerServices();
-    _registerCache();
-    _registerBlocProviders();
+
+    // Register Bloc
+    _registerBloc();
   }
 
-  void _registerMiscModules();
+  static void _configureDio() => _getIt.registerLazySingleton<Dio>(() => Dio());
 
-  /// Register Data Stores
-  void _registerCache();
+  static void _registerApis() {
+    _getIt.registerLazySingleton<ApiClient>(() => ApiClient(_getIt.get<Dio>()));
+    _getIt.registerLazySingleton<HomeApi>(() => HomeApi(_getIt.get<ApiClient>()));
+  }
 
-  /// Register Apis
-  @Register.singleton(HomeApi)
-  @Register.singleton(ApiClient)
-  void _registerApis();
+  static void _registerServices() {
+    _getIt.registerLazySingleton(() => HomeService(_getIt.get<HomeApi>()));
+  }
 
-  /// Register Services
-  @Register.singleton(HomeService)
-  void _registerServices();
+  static void _registerBloc() {
+    _getIt.registerFactory(() => CartBloc(_getIt.get<HomeService>()));
+    _getIt.registerFactory(() => HomeBloc(_getIt.get<HomeService>()));
+  }
 
-  /// Register Bloc dependencies
-  @Register.factory(HomeBloc)
-  @Register.factory(CartBloc)
-  void _registerBlocProviders();
+  static T get<T extends Object>() => _getIt.get<T>();
 }

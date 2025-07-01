@@ -2,11 +2,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ecommerce/api/home/product.dart';
 import 'package:ecommerce/bloc/cart/cart_bloc.dart';
 import 'package:ecommerce/bloc/cart/cart_contract.dart';
+import 'package:ecommerce/inject/injector.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_base_architecture_plugin/core/base_state.dart';
-import 'package:flutter_base_architecture_plugin/core/screen_state.dart';
-import 'package:flutter_base_architecture_plugin/imports/dart_package_imports.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+
+import '../../core/enums.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -15,8 +16,9 @@ class CartScreen extends StatefulWidget {
   State<CartScreen> createState() => _CartScreenState();
 }
 
-class _CartScreenState extends BaseState<CartBloc, CartScreen> {
+class _CartScreenState extends State<CartScreen> {
   var navigatorKey = GlobalKey<NavigatorState>();
+  final bloc = Injector.get<CartBloc>();
 
   @override
   void initState() {
@@ -28,12 +30,20 @@ class _CartScreenState extends BaseState<CartBloc, CartScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-            title: const Text('Selected Products', style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold)),
+            title: const Text('Selected Products',
+                style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold)),
             leading: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back))),
         backgroundColor: Colors.white,
         body: SafeArea(
             child: BlocProvider<CartBloc>(
-                create: (context) => bloc, child: BlocBuilder<CartBloc, CartData>(builder: (_, __) => _MainContent(bloc: bloc)))));
+                create: (context) => bloc,
+                child: BlocBuilder<CartBloc, CartData>(builder: (_, __) => _MainContent(bloc: bloc)))));
+  }
+
+  @override
+  void dispose() {
+    bloc.close();
+    super.dispose();
   }
 }
 
@@ -63,8 +73,8 @@ class _DisplayMessage extends StatelessWidget {
   final String message;
 
   @override
-  Widget build(BuildContext context) =>
-      Center(child: Text(message, style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)));
+  Widget build(BuildContext context) => Center(
+      child: Text(message, style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)));
 }
 
 class _ScreenContent extends StatelessWidget {
@@ -80,7 +90,8 @@ class _ScreenContent extends StatelessWidget {
                 thumbVisibility: true,
                 child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: _ProductList(products: bloc.state.products.where((product) => product.isSelected).toList())))),
+                    child:
+                        _ProductList(products: bloc.state.products.where((product) => product.isSelected).toList())))),
         const Divider(height: 2),
         _TotalAmount(totalAmount: bloc.state.totalAmount.toStringAsFixed(2))
       ]);
@@ -119,19 +130,25 @@ class _ProductItem extends StatelessWidget {
               errorWidget: (context, url, error) => const Icon(Icons.error)),
           const Gap(6),
           Expanded(
-              child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Text(product.title ?? '', overflow: TextOverflow.visible, style: const TextStyle(fontSize: 15)),
-            RichText(
-                text: TextSpan(style: DefaultTextStyle.of(context).style, children: <TextSpan>[
-              const TextSpan(text: 'Price - ', style: TextStyle(fontSize: 14)),
-              TextSpan(text: '\$${product.price}/-', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))
-            ])),
-            RichText(
-                text: TextSpan(style: DefaultTextStyle.of(context).style, children: <TextSpan>[
-              const TextSpan(text: 'Rating - ', style: TextStyle(fontSize: 14)),
-              TextSpan(text: '${product.rating?.rate}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))
-            ]))
-          ]))
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                Text(product.title ?? '', overflow: TextOverflow.visible, style: const TextStyle(fontSize: 15)),
+                RichText(
+                    text: TextSpan(style: DefaultTextStyle.of(context).style, children: <TextSpan>[
+                  const TextSpan(text: 'Price - ', style: TextStyle(fontSize: 14)),
+                  TextSpan(
+                      text: '\$${product.price}/-', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))
+                ])),
+                RichText(
+                    text: TextSpan(style: DefaultTextStyle.of(context).style, children: <TextSpan>[
+                  const TextSpan(text: 'Rating - ', style: TextStyle(fontSize: 14)),
+                  TextSpan(
+                      text: '${product.rating?.rate}',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))
+                ]))
+              ]))
         ]));
   }
 }
@@ -147,7 +164,8 @@ class _TotalAmount extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           const Text('Total', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          ElevatedButton(onPressed: null, child: Text('\$$totalAmount', style: const TextStyle(color: Colors.black, fontSize: 24)))
+          ElevatedButton(
+              onPressed: null, child: Text('\$$totalAmount', style: const TextStyle(color: Colors.black, fontSize: 24)))
         ]));
   }
 }

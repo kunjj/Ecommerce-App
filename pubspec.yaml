@@ -10,20 +10,24 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-  flutter_base_architecture_plugin: 0.0.1
   cupertino_icons: 1.0.8
   cached_network_image: 3.3.1
   gap: 3.0.1
+  dio:
+  built_value:
+  built_collection:
+  flutter_bloc:
+  logger: 2.5.0
+  get_it:
+  rxdart: 0.28.0
+  flutter_styled_toast: 2.2.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   flutter_lints: 4.0.0
   build_runner:
   built_value_generator:
-  kiwi_generator: 4.2.1
 
 flutter:
   uses-material-design: true

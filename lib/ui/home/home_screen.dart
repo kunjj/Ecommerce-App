@@ -2,17 +2,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ecommerce/api/home/product.dart';
 import 'package:ecommerce/bloc/home/home_bloc.dart';
 import 'package:ecommerce/bloc/home/home_contract.dart';
-import 'package:ecommerce/ui/cart/cart_screen.dart';
+import 'package:ecommerce/core/app_navigator.dart';
+import 'package:ecommerce/core/routes.dart';
+import 'package:ecommerce/core/side_effects.dart';
+import 'package:ecommerce/inject/injector.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_base_architecture_plugin/core/base_state.dart';
-import 'package:flutter_base_architecture_plugin/core/screen_state.dart';
-import 'package:flutter_base_architecture_plugin/core/view_actions.dart';
-import 'package:flutter_base_architecture_plugin/extension/navigation_extensions.dart';
-import 'package:flutter_base_architecture_plugin/imports/dart_package_imports.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
-
 import '../../core/constant.dart';
-import '../../core/routes.dart';
+import '../../core/enums.dart';
+import '../cart/cart_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,27 +20,30 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends BaseState<HomeBloc, HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> {
+  final bloc = Injector.get<HomeBloc>();
+
   @override
   void initState() {
     super.initState();
+    bloc.sideEffects.listen(onSideEffect);
     bloc.add(InitHomeEvent());
   }
 
-  @override
-  void onViewEvent(ViewAction event) {
-    super.onViewEvent(event);
-    switch (event.runtimeType) {
+  void onSideEffect(SideEffects sideEffect) {
+    switch (sideEffect.runtimeType) {
       case const (NavigateScreen):
-        buildHandleActionEvent(event as NavigateScreen);
+        buildHandleActionEvent(sideEffect as NavigateScreen);
     }
   }
 
   void buildHandleActionEvent(NavigateScreen screen) async {
     switch (screen.target) {
       case AppRoutes.cartScreen:
-        await navigatorKey.currentContext
-            ?.push(settings: RouteSettings(name: screen.target), builder: (context) => const CartScreen());
+        await navigatorKey.currentContext?.push(
+            settings: RouteSettings(name: screen.target),
+            builder: (context) => const CartScreen(),
+            transitionType: PageTransitionType.rightToLeft);
     }
   }
 
@@ -53,13 +55,23 @@ class _HomeScreenState extends BaseState<HomeBloc, HomeScreen> {
         home: Scaffold(
             appBar: AppBar(
                 title: const Text('Products',
-                    style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-                actions: [IconButton(onPressed: () => bloc.add(NavigateToCartScreenEvent()), icon: const Icon(Icons.shopping_cart))]),
+                    style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center),
+                actions: [
+                  IconButton(
+                      onPressed: () => bloc.add(NavigateToCartScreenEvent()), icon: const Icon(Icons.shopping_cart))
+                ]),
             backgroundColor: Colors.white,
             body: SafeArea(
                 child: BlocProvider<HomeBloc>(
                     create: (context) => bloc,
                     child: BlocBuilder<HomeBloc, HomeData>(builder: (_, __) => _MainContent(bloc: bloc))))));
+  }
+
+  @override
+  void dispose() {
+    bloc.close();
+    super.dispose();
   }
 }
 
@@ -91,11 +103,15 @@ class _DisplayMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text(message,
-              textAlign: TextAlign.justify, style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
-          ElevatedButton(onPressed: onRetryTap, child: const Text('Re-try'))
-        ]),
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(message,
+                  textAlign: TextAlign.justify,
+                  style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
+              ElevatedButton(onPressed: onRetryTap, child: const Text('Re-try'))
+            ]),
       );
 }
 
@@ -143,7 +159,8 @@ class _ProductList extends StatelessWidget {
         cacheExtent: 5,
         itemBuilder: (_, index) {
           var product = products[index];
-          return _ProductItem(product: product, onRemoveTap: () => onRemoveTap(product), onAddTap: () => onProductAddToCart(product));
+          return _ProductItem(
+              product: product, onRemoveTap: () => onRemoveTap(product), onAddTap: () => onProductAddToCart(product));
         },
         separatorBuilder: (_, __) => const Divider(height: 2),
         itemCount: products.length);
@@ -173,19 +190,25 @@ class _ProductItem extends StatelessWidget {
             ),
             const Gap(6),
             Expanded(
-                child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              Text(product.title ?? '', overflow: TextOverflow.visible, style: const TextStyle(fontSize: 15)),
-              RichText(
-                  text: TextSpan(style: DefaultTextStyle.of(context).style, children: <TextSpan>[
-                const TextSpan(text: 'Price - ', style: TextStyle(fontSize: 14)),
-                TextSpan(text: '\$${product.price}/-', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))
-              ])),
-              RichText(
-                  text: TextSpan(style: DefaultTextStyle.of(context).style, children: <TextSpan>[
-                const TextSpan(text: 'Rating - ', style: TextStyle(fontSize: 14)),
-                TextSpan(text: '${product.rating?.rate}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))
-              ]))
-            ])),
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                  Text(product.title ?? '', overflow: TextOverflow.visible, style: const TextStyle(fontSize: 15)),
+                  RichText(
+                      text: TextSpan(style: DefaultTextStyle.of(context).style, children: <TextSpan>[
+                    const TextSpan(text: 'Price - ', style: TextStyle(fontSize: 14)),
+                    TextSpan(
+                        text: '\$${product.price}/-', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))
+                  ])),
+                  RichText(
+                      text: TextSpan(style: DefaultTextStyle.of(context).style, children: <TextSpan>[
+                    const TextSpan(text: 'Rating - ', style: TextStyle(fontSize: 14)),
+                    TextSpan(
+                        text: '${product.rating?.rate}',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))
+                  ]))
+                ])),
             const Gap(6),
             product.isSelected
                 ? IconButton(onPressed: () => onRemoveTap(), icon: const Icon(Icons.remove_circle_outline))

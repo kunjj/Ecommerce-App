@@ -1,6 +1,6 @@
+import 'package:built_value/built_value.dart';
 import 'package:ecommerce/api/home/product.dart';
-import 'package:flutter_base_architecture_plugin/core/screen_state.dart';
-import 'package:flutter_base_architecture_plugin/imports/dart_package_imports.dart';
+import 'package:ecommerce/core/enums.dart';
 
 part 'home_contract.g.dart';
 
