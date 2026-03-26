@@ -1,4 +1,4 @@
-import 'package:flutter_base_architecture_plugin/imports/dart_package_imports.dart';
+import 'package:dio/dio.dart';
 
 class ApiResponse<T> {
   final T? data;
@@ -17,14 +17,14 @@ class ApiResponse<T> {
 class ApiClient {
   final Dio _dio;
 
-  ApiClient() : _dio = Dio() {
+  ApiClient(this._dio) {
     _dio.options.baseUrl = 'https://fakestoreapi.com/'; // Replace with your API base URL
     _dio.options.connectTimeout = const Duration(seconds: 30);
     _dio.options.receiveTimeout = const Duration(seconds: 30);
     _dio.options.headers = {'Content-Type': 'application/json', 'Accept': 'application/json'};
 
-    _dio.interceptors.add(
-        LogInterceptor(request: true, requestHeader: true, requestBody: true, responseHeader: true, responseBody: true, error: true));
+    _dio.interceptors.add(LogInterceptor(
+        request: true, requestHeader: true, requestBody: true, responseHeader: true, responseBody: true, error: true));
   }
 
   Future<ApiResponse<T>> get<T>({required String path}) async {

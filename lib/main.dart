@@ -4,9 +4,8 @@ import 'package:ecommerce/ui/home/home_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_base_architecture_plugin/core/logging.dart';
-import 'package:flutter_base_architecture_plugin/imports/injector_imports.dart';
 
+import 'core/logging.dart';
 import 'inject/injector.dart';
 
 void main() async {
@@ -15,8 +14,7 @@ void main() async {
 
     WidgetsFlutterBinding.ensureInitialized();
 
-    await BaseInjector.setup();
-    await Injector.setup();
+    Injector.setUp();
 
     runApp(const HomeScreen());
   }, (Object error, StackTrace stackTrace) {
